@@ -1,4 +1,4 @@
-const { fetchLocation, fetchWeather, fetchCrypto, fetchNews } = require('./thirdApiFetcher');
+const { fetchLocation, fetchWeather, fetchCrypto, fetchNews, fetchCurrency } = require('./thirdApiFetcher');
 
 const weather = () => async (req, res) => {
     const { city } = req.query;
@@ -27,8 +27,15 @@ const news = () => async (req, res) => {
         .catch(error => res.status(500).json({ message: 'Error fetching news data', error }));
 };
 
+const currency = () => async (req, res) => {
+    return fetchCurrency()
+        .then(currencyData => res.status(200).json(currencyData))
+        .catch(error => res.status(500).json({ message: 'Error fetching currency data', error }));
+};
+
 module.exports = {
     weather,
     crypto,
-    news
+    news,
+    currency
 };

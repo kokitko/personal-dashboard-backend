@@ -46,9 +46,20 @@ async function fetchNews(keywords) {
     return data;
 }
 
+async function fetchCurrency() {
+    const currencyApi = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json';
+    const response = await fetch(currencyApi);
+    if (!response.ok) {
+        throw new Error('Failed to fetch currency data');
+    }
+    const data = await response.json();
+    return data;
+}
+
 module.exports = {
     fetchLocation,
     fetchWeather,
     fetchCrypto,
-    fetchNews
+    fetchNews,
+    fetchCurrency
 };
