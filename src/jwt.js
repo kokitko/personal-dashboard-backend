@@ -4,11 +4,14 @@ const bcrypt = require('bcrypt');
 
 const register = () => async (req, res) => {
     try {
-        const existingUser = await User.findOne({ email: req.body.email });
+        const { username, email, password } = req.body;
+        if (!username || !email || !password) {
+            return res.status(400).json({ message: 'Username, email, and password are required' });
+        }
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: 'Email is already registered' });
         }
-        const { username, email, password } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ username, email, password: hashedPassword });
         await newUser.save();
@@ -22,6 +25,9 @@ const register = () => async (req, res) => {
 const login = () => async (req, res) => {
     try {
         const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
@@ -55,10 +61,26 @@ const token = () => async (req, res) => {
     }
 };
 
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Access token is required' });
+    }
+    try {
+        const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        req.user = user;
+        next();
+    } catch (error) {
+        return res.status(403).json({ message: 'Invalid access token' });
+    }
+}
+
 module.exports = {
     register,
     login,
-    token
+    token,
+    authenticateToken
 };
 
 function generateRefreshToken(user) {
