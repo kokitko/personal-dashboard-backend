@@ -7,10 +7,12 @@ const register = () => async (req, res) => {
         console.log("INFO: Register endpoint called");
         const { username, email, password } = req.body;
         if (!username || !email || !password) {
+            console.error("Registration failed: Missing fields");
             return res.status(400).json({ message: 'Username, email, and password are required' });
         }
         const existingUser = await User.findOne({ email });
         if (existingUser) {
+            console.error("Registration failed: Email already registered =", email);
             return res.status(400).json({ message: 'Email is already registered' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -29,19 +31,22 @@ const login = () => async (req, res) => {
         console.log("INFO: Login endpoint called");
         const { email, password } = req.body;
         if (!email || !password) {
+            console.error("Login failed: Missing fields");
             return res.status(400).json({ message: 'Email and password are required' });
         }
         const user = await User.findOne({ email });
         if (!user) {
+            console.error("Login failed: Invalid email =", email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
+            console.error("Login failed: Invalid password for email =", email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
-        console.log("INFO: User logged in successfully, id =", user._id);
+        console.log("INFO: User logged in successfully, email =", user.email);
         return res.status(200).json({ accessToken, refreshToken });
     } catch (error) {
         console.error('Error during login:', error);
@@ -53,13 +58,14 @@ const token = () => async (req, res) => {
     console.log("INFO: Token endpoint called");
     const { refreshToken } = req.body;
     if (!refreshToken) {
+        console.error("Token refresh failed: Missing refresh token");
         return res.status(401).json({ message: 'Refresh token is required' });
     }
     try {
         const user = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
         const newAccessToken = generateAccessToken(user);
         const newRefreshToken = generateRefreshToken(user);
-        console.log("INFO: Token refreshed successfully, user id =", user.id || user._id);
+        console.log("INFO: Token refreshed successfully, user email =", user.email);
         return res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
     } catch (error) {
         console.error('Error verifying refresh token:', error);
@@ -72,6 +78,7 @@ const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
+        console.error("Access token missing in request");
         return res.status(401).json({ message: 'Access token is required' });
     }
     try {
@@ -93,7 +100,6 @@ module.exports = {
 };
 
 function generateRefreshToken(user) {
-    console.log("Generating refresh token for user id =", user.id || user._id);
     const userId = user.id || user._id;
     const payload = {
         id: userId,
@@ -104,7 +110,6 @@ function generateRefreshToken(user) {
 }
 
 function generateAccessToken(user) {
-    console.log("Generating access token for user id =", user.id || user._id);
     const userId = user.id || user._id;
     const payload = {
         id: userId,
