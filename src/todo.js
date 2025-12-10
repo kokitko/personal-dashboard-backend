@@ -1,6 +1,6 @@
-const Todo = require('./database/todo');
+import Todo from './database/todo.js';
 
-const addTodo = () => async (req, res) => {
+export const addTodo = async (req, res) => {
     try {
         const { title } = req.body;
         const userId = req.user.id;
@@ -16,7 +16,7 @@ const addTodo = () => async (req, res) => {
     }
 };
 
-const getTodos = () => async (req, res) => {
+export const getTodos = async (req, res) => {
     try {
         const userId = req.user.id;
         const todos = await Todo.find({ userId: userId });
@@ -26,7 +26,7 @@ const getTodos = () => async (req, res) => {
     }
 }
 
-const toggleCompleteTodo = () => async (req, res) => {
+export const toggleCompleteTodo = async (req, res) => {
     try {
         const { id } = req.params;
         const todo = await Todo.findOne({ _id: id, userId: req.user.id });
@@ -41,7 +41,7 @@ const toggleCompleteTodo = () => async (req, res) => {
     }
 };
 
-const deleteTodo = () => async (req, res) => {
+export const deleteTodo = async (req, res) => {
     try {
         const { id } = req.params;
         const todo = await Todo.findOneAndDelete({ _id: id, userId: req.user.id });
@@ -54,9 +54,9 @@ const deleteTodo = () => async (req, res) => {
     }
 };
 
-module.export = {
-    addTodo,
-    getTodos,
-    toggleCompleteTodo,
-    deleteTodo
-}
+// module.export = {
+//     addTodo,
+//     getTodos,
+//     toggleCompleteTodo,
+//     deleteTodo
+// }

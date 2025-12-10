@@ -17,10 +17,10 @@ app.get('/crypto', crypto());
 app.get('/news', news());
 app.get('/currency', currency());
 
-app.post('/todo', authenticateToken, addTodo());
-app.get('/todo', authenticateToken, getTodos());
-app.put('/todo/:id/toggle', authenticateToken, toggleCompleteTodo());
-app.delete('/todo/:id', authenticateToken, deleteTodo());
+app.post('/todo', authenticateToken, addTodo);
+app.get('/todo', authenticateToken, getTodos);
+app.put('/todo/:id/toggle', authenticateToken, toggleCompleteTodo);
+app.delete('/todo/:id', authenticateToken, deleteTodo);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
