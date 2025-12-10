@@ -1,6 +1,7 @@
 const { fetchLocation, fetchWeather, fetchCrypto, fetchNews, fetchCurrency } = require('./thirdApiFetcher');
 
 const weather = () => async (req, res) => {
+    console.log("INFO: Weather endpoint called");
     const { city } = req.query;
     return fetchLocation(city)
         .then(locationData => {
@@ -15,12 +16,14 @@ const weather = () => async (req, res) => {
 };
 
 const crypto = () => async (req, res) => {
+    console.log("INFO: Crypto endpoint called");
     return fetchCrypto()
         .then(cryptoData => res.status(200).json(cryptoData))
         .catch(error => res.status(500).json({ message: 'Error fetching crypto data', error }));
 };
 
 const news = () => async (req, res) => {
+    console.log("INFO: News endpoint called");
     const keywords = req.query.keywords || 'latest';
     return fetchNews(keywords)
         .then(newsData => res.status(200).json(newsData))
@@ -28,6 +31,7 @@ const news = () => async (req, res) => {
 };
 
 const currency = () => async (req, res) => {
+    console.log("INFO: Currency endpoint called");
     return fetchCurrency()
         .then(currencyData => res.status(200).json(currencyData))
         .catch(error => res.status(500).json({ message: 'Error fetching currency data', error }));
