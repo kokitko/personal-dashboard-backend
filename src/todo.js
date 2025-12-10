@@ -1,11 +1,11 @@
-import Todo from './database/todo.js';
+const Todo = require('./database/todo');
 
-export const addTodo = async (req, res) => {
+const addTodo = async (req, res) => {
     try {
-        const { title } = req.body;
+        const { text } = req.body;
         const userId = req.user.id;
         const newTodo = new Todo({
-            title: { text: title },
+            text: text,
             completed: false,
             userId: userId
         });
@@ -16,7 +16,7 @@ export const addTodo = async (req, res) => {
     }
 };
 
-export const getTodos = async (req, res) => {
+const getTodos = async (req, res) => {
     try {
         const userId = req.user.id;
         const todos = await Todo.find({ userId: userId });
@@ -24,9 +24,9 @@ export const getTodos = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
-}
+};
 
-export const toggleCompleteTodo = async (req, res) => {
+const toggleCompleteTodo = async (req, res) => {
     try {
         const { id } = req.params;
         const todo = await Todo.findOne({ _id: id, userId: req.user.id });
@@ -41,7 +41,7 @@ export const toggleCompleteTodo = async (req, res) => {
     }
 };
 
-export const deleteTodo = async (req, res) => {
+const deleteTodo = async (req, res) => {
     try {
         const { id } = req.params;
         const todo = await Todo.findOneAndDelete({ _id: id, userId: req.user.id });
@@ -54,9 +54,9 @@ export const deleteTodo = async (req, res) => {
     }
 };
 
-// module.export = {
-//     addTodo,
-//     getTodos,
-//     toggleCompleteTodo,
-//     deleteTodo
-// }
+module.exports = {
+    addTodo,
+    getTodos,
+    toggleCompleteTodo,
+    deleteTodo
+};

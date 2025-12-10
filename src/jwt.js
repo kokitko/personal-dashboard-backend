@@ -84,8 +84,9 @@ module.exports = {
 };
 
 function generateRefreshToken(user) {
+    const userId = user.id || user._id;
     const payload = {
-        id: user._id,
+        id: userId,
         email: user.email,
         username: user.username
     };
@@ -93,8 +94,9 @@ function generateRefreshToken(user) {
 }
 
 function generateAccessToken(user) {
+    const userId = user.id || user._id;
     const payload = {
-        id: user._id,
+        id: userId,
         email: user.email,
         username: user.username
     };
