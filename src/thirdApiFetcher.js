@@ -1,3 +1,4 @@
+require('dotenv').config();
 
 async function fetchLocation(city) {
     const apiKey = process.env.WEATHER_API_KEY;
@@ -25,9 +26,8 @@ async function fetchWeather(lat, lon) {
 }
 
 async function fetchCrypto() {
-    const apiKey = process.env.CRYPTO_API_KEY;
-    const cryptoApi = 'https://api.coingecko.com/api/v3/simple/price';
-    const response = await fetch(`${cryptoApi}?x_cg_demo_api_key=${apiKey}&vs_currencies=usd&ids=bitcoin,ethereum,binancecoin,the-open-network,dogecoin`);
+    const currencyApi = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json";
+    const response = await fetch(currencyApi);
     if (!response.ok) {
         throw new Error('Failed to fetch crypto data');
     }

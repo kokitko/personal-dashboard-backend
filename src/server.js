@@ -1,12 +1,20 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const db = require('./database/database');
+require('dotenv').config();
 const { register, login, token, authenticateToken } = require('./jwt');
 const { weather, crypto, news, currency } = require('./boardEndpoints');
 const { addTodo, getTodos, toggleCompleteTodo, deleteTodo } = require('./todo');
 
 const PORT = process.env.PORT || 3000;
 app.use(express.json());
+app.use(cors({
+    origin: [process.env.FRONTEND_URL],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 
 app.post('/register', register());
 app.post('/login', login());
