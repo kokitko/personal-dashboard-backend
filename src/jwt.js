@@ -2,6 +2,13 @@ const User = require('./database/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+const refreshCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    path: '/token'
+};
+
 const register = () => async (req, res) => {
     try {
         console.log("INFO: Register endpoint called");
@@ -44,10 +51,11 @@ const login = () => async (req, res) => {
             console.error("Login failed: Invalid password for email =", email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
-        const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
+        const accessToken = generateAccessToken(user); 
+        res.cookie('refreshToken', refreshToken, refreshCookieOptions);
         console.log("INFO: User logged in successfully, email =", user.email);
-        return res.status(200).json({ accessToken, refreshToken });
+        return res.status(200).json({ accessToken });
     } catch (error) {
         console.error('Error during login:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -56,7 +64,7 @@ const login = () => async (req, res) => {
 
 const token = () => async (req, res) => {
     console.log("INFO: Token endpoint called");
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
         console.error("Token refresh failed: Missing refresh token");
         return res.status(401).json({ message: 'Refresh token is required' });
@@ -66,7 +74,8 @@ const token = () => async (req, res) => {
         const newAccessToken = generateAccessToken(user);
         const newRefreshToken = generateRefreshToken(user);
         console.log("INFO: Token refreshed successfully, user email =", user.email);
-        return res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+        res.cookie('refreshToken', newRefreshToken, refreshCookieOptions);
+        return res.status(200).json({ accessToken: newAccessToken });
     } catch (error) {
         console.error('Error verifying refresh token:', error);
         return res.status(403).json({ message: 'Invalid refresh token' });
