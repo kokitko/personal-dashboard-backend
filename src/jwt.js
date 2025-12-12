@@ -6,7 +6,8 @@ const refreshCookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    path: '/'
+    path: '/',
+    domain: process.env.COOKIE_DOMAIN || undefined
 };
 
 const register = () => async (req, res) => {
@@ -84,7 +85,7 @@ const token = () => async (req, res) => {
 
 const logout = () => async (req, res) => {
     console.log("INFO: Logout endpoint called");
-    res.clearCookie('refreshToken', { path: '/token' });
+    res.clearCookie('refreshToken', refreshCookieOptions);
     return res.status(200).json({ message: 'Logged out successfully' });
 }
 
