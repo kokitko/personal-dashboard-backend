@@ -4,7 +4,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const db = require('./database/database');
 require('dotenv').config();
-const { register, login, token, authenticateToken } = require('./jwt');
+const { register, login, token, logout, authenticateToken } = require('./jwt');
 const { weather, crypto, news, currency } = require('./boardEndpoints');
 const { addTodo, getTodos, toggleCompleteTodo, deleteTodo } = require('./todo');
 
@@ -21,6 +21,7 @@ app.use(cors({
 app.post('/register', register());
 app.post('/login', login());
 app.post('/token', token());
+app.post('/logout', logout());
 
 app.get('/weather', weather());
 app.get('/crypto', crypto());

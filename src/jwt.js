@@ -6,7 +6,7 @@ const refreshCookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    path: '/token'
+    path: '/'
 };
 
 const register = () => async (req, res) => {
@@ -82,6 +82,12 @@ const token = () => async (req, res) => {
     }
 };
 
+const logout = () => async (req, res) => {
+    console.log("INFO: Logout endpoint called");
+    res.clearCookie('refreshToken', { path: '/token' });
+    return res.status(200).json({ message: 'Logged out successfully' });
+}
+
 const authenticateToken = (req, res, next) => {
     console.log("INFO: authenticateToken middleware called");
     const authHeader = req.headers['authorization'];
@@ -105,6 +111,7 @@ module.exports = {
     register,
     login,
     token,
+    logout,
     authenticateToken
 };
 
