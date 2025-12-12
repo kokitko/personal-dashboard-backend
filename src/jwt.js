@@ -6,8 +6,7 @@ const refreshCookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    path: '/',
-    domain: process.env.COOKIE_DOMAIN || undefined
+    path: '/'
 };
 
 const register = () => async (req, res) => {
