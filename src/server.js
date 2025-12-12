@@ -18,20 +18,20 @@ app.use(cors({
     credentials: true
 }));
 
-app.post('/register', register());
-app.post('/login', login());
-app.post('/token', token());
-app.post('/logout', logout());
+app.post('/api/register', register());
+app.post('/api/login', login());
+app.post('/api/token', token());
+app.post('/api/logout', logout());
 
-app.get('/weather', weather());
-app.get('/crypto', crypto());
-app.get('/news', news());
-app.get('/currency', currency());
+app.get('/api/weather', weather());
+app.get('/api/crypto', crypto());
+app.get('/api/news', news());
+app.get('/api/currency', currency());
 
-app.post('/todo', authenticateToken, addTodo);
-app.get('/todo', authenticateToken, getTodos);
-app.put('/todo/:id/toggle', authenticateToken, toggleCompleteTodo);
-app.delete('/todo/:id', authenticateToken, deleteTodo);
+app.post('/api/todo', authenticateToken, addTodo);
+app.get('/api/todo', authenticateToken, getTodos);
+app.put('/api/todo/:id/toggle', authenticateToken, toggleCompleteTodo);
+app.delete('/api/todo/:id', authenticateToken, deleteTodo);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
