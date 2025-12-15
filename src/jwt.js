@@ -2,13 +2,6 @@ const User = require('./database/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
-const refreshCookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    path: '/'
-};
-
 const register = () => async (req, res) => {
     try {
         console.log("INFO: Register endpoint called");
@@ -51,9 +44,8 @@ const login = () => async (req, res) => {
             console.error("Login failed: Invalid password for email =", email);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
-        const refreshToken = generateRefreshToken(user);
-        const accessToken = generateAccessToken(user); 
-        res.cookie('refreshToken', refreshToken, refreshCookieOptions);
+        const userAgent = req.headers['user-agent'];
+        const accessToken = generateAccessToken(userAgent, user); 
         console.log("INFO: User logged in successfully, email =", user.email);
         return res.status(200).json({ accessToken });
     } catch (error) {
@@ -61,32 +53,6 @@ const login = () => async (req, res) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 };
-
-const token = () => async (req, res) => {
-    console.log("INFO: Token endpoint called");
-    const refreshToken = req.cookies?.refreshToken;
-    if (!refreshToken) {
-        console.error("Token refresh failed: Missing refresh token");
-        return res.status(401).json({ message: 'Refresh token is required' });
-    }
-    try {
-        const user = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-        const newAccessToken = generateAccessToken(user);
-        const newRefreshToken = generateRefreshToken(user);
-        console.log("INFO: Token refreshed successfully, user email =", user.email);
-        res.cookie('refreshToken', newRefreshToken, refreshCookieOptions);
-        return res.status(200).json({ accessToken: newAccessToken });
-    } catch (error) {
-        console.error('Error verifying refresh token:', error);
-        return res.status(403).json({ message: 'Invalid refresh token' });
-    }
-};
-
-const logout = () => async (req, res) => {
-    console.log("INFO: Logout endpoint called");
-    res.clearCookie('refreshToken', refreshCookieOptions);
-    return res.status(200).json({ message: 'Logged out successfully' });
-}
 
 const authenticateToken = (req, res, next) => {
     console.log("INFO: authenticateToken middleware called");
@@ -97,7 +63,12 @@ const authenticateToken = (req, res, next) => {
         return res.status(401).json({ message: 'Access token is required' });
     }
     try {
+        const userAgent = req.headers['user-agent'];
         const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        if (user.userAgent !== userAgent) {
+            console.error("Access token user agent mismatch");
+            return res.status(403).json({ message: 'Invalid access token' });
+        }
         req.user = user;
         console.log("INFO: Access token verified, user id =", user.id || user._id);
         next();
@@ -110,27 +81,16 @@ const authenticateToken = (req, res, next) => {
 module.exports = {
     register,
     login,
-    token,
-    logout,
     authenticateToken
 };
 
-function generateRefreshToken(user) {
+function generateAccessToken(userAgent, user) {
     const userId = user.id || user._id;
     const payload = {
         id: userId,
         email: user.email,
-        username: user.username
+        username: user.username,
+        userAgent: userAgent
     };
-    return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
-}
-
-function generateAccessToken(user) {
-    const userId = user.id || user._id;
-    const payload = {
-        id: userId,
-        email: user.email,
-        username: user.username
-    };
-    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30m' });
+    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '2d' });
 }
